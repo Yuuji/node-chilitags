@@ -7,11 +7,14 @@
             "cflags": [
                 "-std=c++11"
             ],
-           "xcode_settings": {
-               "OTHER_CFLAGS": [
-                   "-std=c++11"
-               ],
-            },
+            "xcode_settings": {
+                "GCC_ENABLE_CPP_RTTI": "YES",
+                "GCC_ENABLE_CPP_EXCEPTIONS": "YES",
+                "OTHER_CPLUSPLUSFLAGS":["-stdlib=libc++"],
+                "OTHER_LDFLAGS":["-stdlib=libc++", "-L/opt/local/lib"],
+                "CLANG_CXX_LANGUAGE_STANDARD":"c++11",
+                "MACOSX_DEPLOYMENT_TARGET":"10.7"
+            }
         }
     ]
 }
