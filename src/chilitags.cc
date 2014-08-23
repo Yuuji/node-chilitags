@@ -144,6 +144,21 @@ Handle<Value> Chilitags::detect(const Arguments& args) {
     Chilitags* obj = ObjectWrap::Unwrap<Chilitags>(args.This());
     struct ChilitagData* data = obj->detectChilitags();
     
+    if (args[0]->IsUndefined()==false) {
+        cv::vector<int> compression_params;
+        compression_params.push_back(CV_IMWRITE_PNG_COMPRESSION);
+        compression_params.push_back(9);
+       
+        v8::String::Utf8Value param1(args[0]->ToString());
+        std::string filename = std::string(*param1);
+         
+        try {
+            cv::imwrite(filename, data->inputImage, compression_params);
+        } catch (std::runtime_error& ex) {
+            fprintf(stderr, "Exception converting image to PNG format: %s\n", ex.what());
+        }
+}
+    
     Handle<Object> Result = Object::New();
     Result->Set(String::New("processingTime"), Number::New(data->processingTime));
     
