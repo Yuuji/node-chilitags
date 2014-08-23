@@ -11,6 +11,7 @@
 #endif
 
 #include <opencv2/core/core_c.h> // CV_AA
+#include <opencv2/highgui/highgui.hpp>
 
 struct Border {
     cv::Point p1;
@@ -38,7 +39,7 @@ private:
     explicit Chilitags(int setxRes = 640, int setyRes = 480, int setcameraIndex = 0);
     ~Chilitags();
     
-    struct ChilitagData* chilitags::detectChilitags();
+    struct ChilitagData* detectChilitags();
     
     static v8::Handle<v8::Value> New(const v8::Arguments& args);
     static v8::Handle<v8::Value> detect(const v8::Arguments& args);

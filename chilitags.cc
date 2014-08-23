@@ -9,13 +9,13 @@ Persistent<Function> Chilitags::constructor;
 Chilitags::Chilitags(int setxRes, int setyRes, int setcameraIndex) {
     xRes = setxRes;
     yRes = setyRes;
-    cameraIndex = setcameraIndex
+    cameraIndex = setcameraIndex;
     
     cv::VideoCapture capture(cameraIndex);
     if (!capture.isOpened())
     {
-        std::cerr << "Unable to initialise video capture." << std::endl;
-        return 1;
+	    ThrowException(Exception::TypeError(String::New("Unable to initalise video capture.")));
+        return;
     }
     
 #ifdef OPENCV3
@@ -64,7 +64,7 @@ Handle<Value> Chilitags::New(const Arguments& args) {
     }
 }
 
-struct ChilitagData* chilitags::detectChilitags() {
+struct ChilitagData* Chilitags::detectChilitags() {
     struct ChilitagData* data = new ChilitagData;
     // Capture a new image.
     capture.read(data->inputImage);
@@ -94,7 +94,7 @@ struct ChilitagData* chilitags::detectChilitags() {
     
     cv::flip(data->inputImage,data->inputImage,1);
     
-    int count;
+    int count = 0;
     struct ChilitagInfo *currentTag;
 
     for (const std::pair<int, chilitags::Quad> & tag : tags) {
@@ -104,7 +104,7 @@ struct ChilitagData* chilitags::detectChilitags() {
         const cv::Mat_<cv::Point2f> corners(tag.second);
         
         count++;
-        if (count===1) {
+        if (count==1) {
             data->tags = new ChilitagInfo;
             currentTag = data->tags;
         } else {
@@ -138,7 +138,7 @@ struct ChilitagData* chilitags::detectChilitags() {
 Handle<Value> Chilitags::detect(const Arguments& args) {
     HandleScope scope;
     
-    Chilitags* obj = ObjectWrap::Unwrap<MyObject>(args.This());
+    Chilitags* obj = ObjectWrap::Unwrap<Chilitags>(args.This());
     struct ChilitagData* data = obj->detectChilitags();
     
     Handle<Object> Result = Object::New();
