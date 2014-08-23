@@ -8,4 +8,4 @@ void InitAll(Handle<Object> exports) {
     Chilitags::Init(exports);
 }
 
-NODE_MODULE(addon, InitAll)
+NODE_MODULE(chilitags, InitAll)
