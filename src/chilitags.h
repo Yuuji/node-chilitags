@@ -22,11 +22,11 @@ struct ChilitagInfo {
     int id;
     Border borders[4];
     cv::Point2f center;
-    ChilitagInfo *next;
+    ChilitagInfo *next = NULL;
 };
 
 struct ChilitagData {
-    ChilitagInfo *tags;
+    ChilitagInfo *tags = NULL;
     cv::Mat inputImage;
     double processingTime;
 };

@@ -1,8 +1,11 @@
 #define BUILDING_NODE_EXTENSION
 #include <node.h>
+#include <iostream>
 #include "chilitags.h"
 
 using namespace v8;
+using std::cout;
+using std::endl;
 
 Persistent<Function> Chilitags::constructor;
 
@@ -10,11 +13,11 @@ Chilitags::Chilitags(int setxRes, int setyRes, int setcameraIndex) {
     xRes = setxRes;
     yRes = setyRes;
     cameraIndex = setcameraIndex;
-    
-    cv::VideoCapture capture(cameraIndex);
+
+    capture = cv::VideoCapture(cameraIndex);
     if (!capture.isOpened())
     {
-	    ThrowException(Exception::TypeError(String::New("Unable to initalise video capture.")));
+        ThrowException(Exception::TypeError(String::New("Unable to initalise video capture.")));
         return;
     }
     
@@ -66,9 +69,8 @@ Handle<Value> Chilitags::New(const Arguments& args) {
 
 struct ChilitagData* Chilitags::detectChilitags() {
     struct ChilitagData* data = new ChilitagData;
-    // Capture a new image.
-    capture.read(data->inputImage);
     
+    capture.read(data->inputImage);
     // Start measuring the time needed for the detection
     int64 startTime = cv::getTickCount();
     
@@ -82,12 +84,12 @@ struct ChilitagData* Chilitags::detectChilitags() {
     int64 endTime = cv::getTickCount();
     data->processingTime = 1000.0*((double) endTime - startTime)/cv::getTickFrequency();
     
-    
     // Now we start using the result of the detection.
     
     // First, we set up some constants related to the information overlaid
     // on the captured image
     const static cv::Scalar COLOR(255, 0, 255);
+    
     // OpenCv can draw with sub-pixel precision with fixed point coordinates
     static const int SHIFT = 16;
     static const float PRECISION = 1<<SHIFT;
@@ -96,7 +98,7 @@ struct ChilitagData* Chilitags::detectChilitags() {
     
     int count = 0;
     struct ChilitagInfo *currentTag;
-
+    
     for (const std::pair<int, chilitags::Quad> & tag : tags) {
         int id = tag.first;
         // We wrap the corner matrix into a datastructure that allows an
@@ -104,6 +106,7 @@ struct ChilitagData* Chilitags::detectChilitags() {
         const cv::Mat_<cv::Point2f> corners(tag.second);
         
         count++;
+        
         if (count==1) {
             data->tags = new ChilitagInfo;
             currentTag = data->tags;
@@ -150,7 +153,7 @@ Handle<Value> Chilitags::detect(const Arguments& args) {
     
     ChilitagInfo *tag = data->tags;
     ChilitagInfo *lasttag;
-    while (tag) {
+    while (tag != NULL) {
         Handle<Object> tagObject = Object::New();
         tagObject->Set(String::New("id"), Number::New(tag->id));
         
@@ -170,6 +173,7 @@ Handle<Value> Chilitags::detect(const Arguments& args) {
             
             borders->Set(Number::New(i), border);
         }
+        
         tagObject->Set(String::New("borders"), borders);
         
         Handle<Object> center = Object::New();
@@ -178,7 +182,7 @@ Handle<Value> Chilitags::detect(const Arguments& args) {
         tagObject->Set(String::New("center"), center);
         
         lasttag = tag;
-        tag = tag;
+        tag = tag->next;
         
         delete lasttag;
         
