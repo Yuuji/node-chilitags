@@ -9,7 +9,7 @@
   "version": "1.0.0",
   "author": "Mia Sophie Moeller <m.moeller@bytevision.net>",
   "license": "GPLv3",
-  "homepage": "https://github.com/yuuji/chilitags",
+  "homepage": "https://github.com/yuuji/node-chilitags",
   "main": "./build/Release/node-chilitags",
   "repository": {
     "type": "git",
