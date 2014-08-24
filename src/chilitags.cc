@@ -2,6 +2,7 @@
 #include <node.h>
 #include <iostream>
 #include "chilitags.h"
+#include "base64.h"
 
 using namespace v8;
 using std::cout;
@@ -144,22 +145,23 @@ Handle<Value> Chilitags::detect(const Arguments& args) {
     Chilitags* obj = ObjectWrap::Unwrap<Chilitags>(args.This());
     struct ChilitagData* data = obj->detectChilitags();
     
-    if (args[0]->IsUndefined()==false) {
-        cv::vector<int> compression_params;
-        compression_params.push_back(CV_IMWRITE_PNG_COMPRESSION);
-        compression_params.push_back(9);
-       
-        v8::String::Utf8Value param1(args[0]->ToString());
-        std::string filename = std::string(*param1);
-         
-        try {
-            cv::imwrite(filename, data->inputImage, compression_params);
-        } catch (std::runtime_error& ex) {
-            fprintf(stderr, "Exception converting image to PNG format: %s\n", ex.what());
-        }
-}
-    
     Handle<Object> Result = Object::New();
+    
+    cv::vector<int> compression_params;
+    compression_params.push_back(CV_IMWRITE_PNG_COMPRESSION);
+    compression_params.push_back(9);
+    
+    std::vector<uchar> buff;
+    
+    try {
+        cv::imencode(".png", data->inputImage, buff, compression_params);
+    } catch (std::runtime_error& ex) {
+        fprintf(stderr, "Exception converting image to PNG format: %s\n", ex.what());
+    }
+        
+    std::string image_base64 = base64_encode(reinterpret_cast<const unsigned char*>(buff.data()), buff.size());
+    Result->Set(String::New("image"), String::New(image_base64.c_str()));
+    
     Result->Set(String::New("processingTime"), Number::New(data->processingTime));
     
     int key = 0;
