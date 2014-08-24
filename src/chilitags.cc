@@ -10,9 +10,10 @@ using std::endl;
 
 Persistent<Function> Chilitags::constructor;
 
-Chilitags::Chilitags(int setxRes, int setyRes, int setcameraIndex) {
+Chilitags::Chilitags(int setxRes, int setyRes, int setflip, int setcameraIndex) {
     xRes = setxRes;
     yRes = setyRes;
+    flip = setflip;
     cameraIndex = setcameraIndex;
 
     capture = cv::VideoCapture(cameraIndex);
@@ -56,8 +57,9 @@ Handle<Value> Chilitags::New(const Arguments& args) {
         // Invoked as constructor: `new Chilitags(...)`
         int xRes = args[0]->IsUndefined() ? 640 : args[0]->NumberValue();
         int yRes = args[1]->IsUndefined() ? 480 : args[1]->NumberValue();
-        int cameraIndex = args[2]->IsUndefined() ? 0 : args[2]->NumberValue();
-        Chilitags* obj = new Chilitags(xRes, yRes, cameraIndex);
+        int flip = args[2]->IsUndefined() ? 0 : args[2]->NumberValue();
+        int cameraIndex = args[3]->IsUndefined() ? 0 : args[3]->NumberValue();
+        Chilitags* obj = new Chilitags(xRes, yRes, flip, cameraIndex);
         obj->Wrap(args.This());
         return args.This();
     } else {
@@ -95,7 +97,9 @@ struct ChilitagData* Chilitags::detectChilitags() {
     static const int SHIFT = 16;
     static const float PRECISION = 1<<SHIFT;
     
-    cv::flip(data->inputImage,data->inputImage,1);
+    if (flip == 1) {
+      cv::flip(data->inputImage,data->inputImage,1);
+    }
     
     int count = 0;
     struct ChilitagInfo *currentTag;
@@ -119,8 +123,11 @@ struct ChilitagData* Chilitags::detectChilitags() {
         for (size_t i = 0; i < 4; ++i) {
             cv::Point p1 = corners(i);
             cv::Point p2 = corners((i+1)%4);
-            p1.x = xRes - p1.x;
-            p2.x = xRes - p2.x;
+            
+            if (flip == 1) {
+                p1.x = xRes - p1.x;
+                p2.x = xRes - p2.x;
+            }
             
             currentTag->borders[i].p1 = p1;
             currentTag->borders[i].p2 = p2;
@@ -129,8 +136,10 @@ struct ChilitagData* Chilitags::detectChilitags() {
         cv::Point center1 = corners(0);
         cv::Point center2 = corners(1);
         
-        center1.x = xRes - center1.x;
-        center2.x = xRes - center2.x;
+        if (flip == 1) {
+            center1.x = xRes - center1.x;
+            center2.x = xRes - center2.x;
+        }
         
         currentTag->center = 0.5*(center1 + center2);
         currentTag->id = id;

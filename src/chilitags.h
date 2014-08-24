@@ -36,7 +36,7 @@ public:
     static void Init(v8::Handle<v8::Object> exports);
     
 private:
-    explicit Chilitags(int setxRes = 640, int setyRes = 480, int setcameraIndex = 0);
+    explicit Chilitags(int setxRes = 640, int setyRes = 480, int setflip = 0,int setcameraIndex = 0);
     ~Chilitags();
     
     struct ChilitagData* detectChilitags();
@@ -47,6 +47,7 @@ private:
     
     int xRes = 640;
     int yRes = 480;
+    int flip = 0;
     int cameraIndex = 0;
     
     cv::VideoCapture capture;
